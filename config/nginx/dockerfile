@@ -1,0 +1,10 @@
+ FROM nginx
+
+#도커 컨테이너 서버 시간을 한국 서버로 변경
+ENV TZ Asia/Seoul
+RUN apt-get install -y tzdata \
+  && rm -rf /var/lib/apt/lists/* \
+  && echo "${TZ}" > /etc/timezone \
+  && rm /etc/localtime \
+  && ln -s /usr/share/zoneinfo/Asia/Seoul /etc/localtime \
+  && dpkg-reconfigure -f noninteractive tzdata

@@ -1,0 +1,35 @@
+ FROM php:5.6-apache
+
+#도커 컨테이너 서버 시간을 한국 서버로 변경
+ENV TZ Asia/Seoul
+RUN apt-get install -y tzdata \
+  && rm -rf /var/lib/apt/lists/* \
+  && echo "${TZ}" > /etc/timezone \
+  && rm /etc/localtime \
+  && ln -s /usr/share/zoneinfo/Asia/Seoul /etc/localtime \
+  && dpkg-reconfigure -f noninteractive tzdata
+
+RUN chmod 777 -R /var/www/html
+
+# ioncube loader
+ENV phpV 5.6
+RUN curl -fsSL 'http://downloads3.ioncube.com/loader_downloads/ioncube_loaders_lin_x86-64.tar.gz' -o ioncube.tar.gz \
+    && mkdir -p ioncube \
+    && tar -xf ioncube.tar.gz -C ioncube --strip-components=1 \
+    && rm ioncube.tar.gz \
+    && mv ioncube/ioncube_loader_lin_${phpV}.so /var/www/ioncube_loader.so \
+    && rm -r ioncube
+
+#server time set
+ENV TZ Asia/Seoul
+RUN apt-get install -y tzdata \
+  && rm -rf /var/lib/apt/lists/* \
+  && echo "${TZ}" > /etc/timezone \
+  && rm /etc/localtime \
+  && ln -s /usr/share/zoneinfo/Asia/Seoul /etc/localtime \
+  && dpkg-reconfigure -f noninteractive tzdata
+
+RUN a2enmod rewrite
+RUN a2enmod remoteip
+
+# php.ini

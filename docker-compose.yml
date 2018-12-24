@@ -1,0 +1,52 @@
+version: '3.1'
+
+services:
+  proxy:
+    container_name: dev_proxy
+    build:
+        context: .
+        dockerfile: "./config/nginx/dockerfile"
+    restart: always
+    ports:
+      - "80:80" # nginx proxy root port
+    volumes:
+      - "./config/nginx/conf/nginx.conf:/etc/nginx/conf.d/default.conf:ro" # nginx conf config file
+    links:
+      - "tomcat"
+      - "php"
+      - "mysql"
+
+  tomcat:
+    container_name: dev_tomcat
+    build:
+        context: .
+        dockerfile: "./config/tomcat/dockerfile"
+    restart: always
+    links:
+      - "mysql"
+
+  php:
+    container_name: dev_php
+    build:
+        context: .
+        dockerfile: "./config/php/dockerfile"
+    restart: always
+    volumes:
+      - "./config/php/conf/apache-remoteip.conf:/etc/apache2/mods-enabled/remoteip.conf:ro"
+      - "./data/www:/var/www/html"
+    links:
+      - "mysql"
+
+  mysql:
+    container_name: dev_mysql
+    build:
+        context: .
+        dockerfile: "./config/mysql/dockerfile"
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: "@!!" ## 사용시 패스워드 변경필요.
+    #volumes:
+      #- "./config/mariadb/config:/etc/mysql/conf.d"
